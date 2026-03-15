@@ -1,5 +1,5 @@
-import { Pool }           from 'pg';
-import { classifyArticle } from './bias';
+import { Pool }                      from 'pg';
+import { classifyArticle, DEFAULT_TAGS } from './bias';
 
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -9,10 +9,27 @@ const db = new Pool({
 const BATCH_SIZE     = 10;
 const INTERVAL_MS    = 30_000; // run every 30 seconds
 
+/** Load classifier tags from app_settings, falling back to built-in defaults. */
+async function loadClassifierTags(): Promise<string[]> {
+  try {
+    const { rows } = await db.query<{ value: string[] }>(
+      `SELECT value FROM app_settings WHERE key = 'classifier_tags'`,
+    );
+    if (rows.length > 0 && Array.isArray(rows[0].value) && rows[0].value.length > 0) {
+      return rows[0].value as string[];
+    }
+  } catch (err) {
+    console.warn('[classifier] Could not load tags from DB, using defaults:', (err as Error).message);
+  }
+  return DEFAULT_TAGS;
+}
+
 /**
  * Find unclassified articles and classify them in small batches.
  */
 async function classifyBatch(): Promise<void> {
+  const validTags = await loadClassifierTags();
+
   const { rows } = await db.query<{
     id: string; title: string; summary: string | null;
   }>(
@@ -24,13 +41,14 @@ async function classifyBatch(): Promise<void> {
   );
 
   if (rows.length === 0) return;
-  console.log(`[classifier] Classifying ${rows.length} articles...`);
+  console.log(`[classifier] Classifying ${rows.length} articles with ${validTags.length} tags...`);
 
   for (const article of rows) {
     try {
       const { bias, tags } = await classifyArticle(
         article.title,
         article.summary ?? article.title,
+        validTags,
       );
 
       await db.query(

@@ -73,6 +73,7 @@ export default async function DayPage({ params }: Props) {
         date={params.date}
         prevDay={toIsoDate(prev)}
         nextDay={nextStr <= todayStr ? nextStr : null}
+        iranArticles={[]}
       />
     </main>
   );

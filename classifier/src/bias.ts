@@ -9,25 +9,29 @@ export type ContentTags = string[];
 
 const BIAS_LABELS: BiasTag[] = ['left','center-left','center','center-right','right','unknown'];
 
-const VALID_TAGS = new Set([
+const DEFAULT_TAGS = [
   'politics','world','nz','au','us','uk','tech','business','science',
   'health','sport','climate','crime','entertainment','opinion','finance','economy',
-]);
+  'iran','war','middle-east','russia','ukraine','china','military','energy','elections','conflict',
+];
 
-const SYSTEM_PROMPT = `You are a news article classifier.
+function buildSystemPrompt(validTags: string[]): string {
+  const tagList = validTags.join(', ');
+  return `You are a news article classifier.
 Given an article title and summary, return a JSON object with exactly two fields:
 1. "bias": political leaning - one of: left, center-left, center, center-right, right, unknown
-2. "tags": array of 1-4 topic tags chosen ONLY from: politics, world, nz, au, us, uk, tech, business, science, health, sport, climate, crime, entertainment, opinion, finance, economy
+2. "tags": array of 1-4 topic tags chosen ONLY from: ${tagList}
 
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
-Example: {"bias":"center","tags":["politics","nz"]}`;
+Example: {"bias":"center","tags":["politics","world"]}`;
+}
 
 export interface Classification {
   bias: BiasTag;
   tags: ContentTags;
 }
 
-function parseClassification(raw: string): Classification {
+function parseClassification(raw: string, validTagSet: Set<string>): Classification {
   // Try to extract JSON from the response
   const jsonMatch = raw.match(/\{[^}]+\}/);
   if (jsonMatch) {
@@ -36,7 +40,7 @@ function parseClassification(raw: string): Classification {
       const bias = BIAS_LABELS.find(l => String(parsed.bias ?? '').toLowerCase().includes(l)) ?? 'unknown';
       const tags = Array.isArray(parsed.tags)
         ? parsed.tags
-            .filter((t: unknown) => typeof t === 'string' && VALID_TAGS.has(t.toLowerCase()))
+            .filter((t: unknown) => typeof t === 'string' && validTagSet.has(t.toLowerCase()))
             .map((t: string) => t.toLowerCase())
             .slice(0, 4)
         : [];
@@ -49,23 +53,27 @@ function parseClassification(raw: string): Classification {
   return { bias, tags: [] };
 }
 
-async function classifyWithOllama(title: string, summary: string): Promise<Classification> {
-  const prompt = `Title: ${title}\nSummary: ${summary}\n\nClassify:`;
-  const resp   = await axios.post(
+async function classifyWithOllama(title: string, summary: string, validTags: string[]): Promise<Classification> {
+  const prompt     = `Title: ${title}\nSummary: ${summary}\n\nClassify:`;
+  const system     = buildSystemPrompt(validTags);
+  const validTagSet = new Set(validTags);
+  const resp       = await axios.post(
     `${OLLAMA_BASE}/api/generate`,
-    { model: OLLAMA_MODEL, prompt, system: SYSTEM_PROMPT, stream: false },
+    { model: OLLAMA_MODEL, prompt, system, stream: false },
     { timeout: 45000 },
   );
-  return parseClassification((resp.data as { response: string }).response);
+  return parseClassification((resp.data as { response: string }).response, validTagSet);
 }
 
-async function classifyWithClaude(title: string, summary: string): Promise<Classification> {
+async function classifyWithClaude(title: string, summary: string, validTags: string[]): Promise<Classification> {
+  const system     = buildSystemPrompt(validTags);
+  const validTagSet = new Set(validTags);
   const resp = await axios.post(
     'https://api.anthropic.com/v1/messages',
     {
       model:      'claude-haiku-20240307',
       max_tokens: 80,
-      system:     SYSTEM_PROMPT,
+      system,
       messages: [{ role: 'user', content: `Title: ${title}\nSummary: ${summary}\n\nClassify:` }],
     },
     {
@@ -78,17 +86,22 @@ async function classifyWithClaude(title: string, summary: string): Promise<Class
     },
   );
   const content = (resp.data as { content: Array<{ text: string }> }).content;
-  return parseClassification(content[0]?.text ?? '');
+  return parseClassification(content[0]?.text ?? '', validTagSet);
 }
 
 /**
  * Classify an article's political bias and content topics.
  * Tries Ollama first, falls back to Claude API if configured.
+ * @param customTags - override the tag list (loaded from DB); falls back to DEFAULT_TAGS
  */
-export async function classifyArticle(title: string, summary: string): Promise<Classification> {
+export async function classifyArticle(
+  title: string,
+  summary: string,
+  customTags: string[] = DEFAULT_TAGS,
+): Promise<Classification> {
   if (OLLAMA_BASE) {
     try {
-      return await classifyWithOllama(title, summary);
+      return await classifyWithOllama(title, summary, customTags);
     } catch (err) {
       console.warn('[classifier] Ollama failed, trying Claude:', (err as Error).message);
     }
@@ -96,7 +109,7 @@ export async function classifyArticle(title: string, summary: string): Promise<C
 
   if (CLAUDE_KEY) {
     try {
-      return await classifyWithClaude(title, summary);
+      return await classifyWithClaude(title, summary, customTags);
     } catch (err) {
       console.error('[classifier] Claude API failed:', (err as Error).message);
     }
@@ -104,6 +117,8 @@ export async function classifyArticle(title: string, summary: string): Promise<C
 
   return { bias: 'unknown', tags: [] };
 }
+
+export { DEFAULT_TAGS };
 
 /** Backward-compat export */
 export async function classifyBias(title: string, summary: string): Promise<BiasTag> {
