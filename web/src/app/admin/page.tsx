@@ -55,6 +55,9 @@ export default async function AdminDashboard() {
         <Link href="/admin/crawlers" className="border border-ink text-ink px-4 py-2 text-sm uppercase tracking-wide hover:bg-gray-100">
           Crawler Status
         </Link>
+        <Link href="/admin/users" className="border border-ink text-ink px-4 py-2 text-sm uppercase tracking-wide hover:bg-gray-100">
+          Users
+        </Link>
       </div>
 
       {/* Recent jobs */}

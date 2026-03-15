@@ -136,11 +136,11 @@ The first run will:
 
 ### 4. Create your admin account
 
-Open [http://localhost](http://localhost) and click **Register**. The first account created automatically receives the `admin` role.
+Go to [http://localhost:5333/login](http://localhost:5333/login) and click the **Register** tab (next to Sign in). The first account created automatically receives the `admin` role.
 
 ### 5. Access the admin panel
 
-Go to [http://localhost/admin](http://localhost/admin). From here you can:
+Go to [http://localhost:5333/admin](http://localhost:5333/admin). From here you can:
 - View ingestion stats and recent crawl jobs
 - Add, edit, or remove news sources
 - Trigger an immediate crawl of any source (or all sources at once)
@@ -197,7 +197,7 @@ Additional sources can be added via the admin panel. The **Auto-detect** button 
 
 | Service | Port (internal) | Description |
 |---|---|---|
-| `nginx` | 80 (host) | Reverse proxy, rate limiting, security headers |
+| `nginx` | 5333 (host) | Reverse proxy, rate limiting, security headers |
 | `web` | 3000 | Next.js application |
 | `postgres` | 5432 | Database |
 | `ingestion` | — | RSS crawler (no exposed port) |
@@ -232,7 +232,7 @@ docker compose build web && docker compose up -d web
 docker compose exec postgres psql -U newsuser -d newsdb
 
 # Force an immediate crawl of all sources (also available in the admin UI)
-curl -X POST http://localhost/api/crawlers/crawl-all \
+curl -X POST http://localhost:5333/api/crawlers/crawl-all \
   -H "Cookie: news_session=<your-session-token>"
 ```
 

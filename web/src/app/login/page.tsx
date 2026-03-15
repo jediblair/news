@@ -50,8 +50,8 @@ export default function LoginPage() {
             <button
               key={t}
               onClick={() => { setTab(t); setError(''); }}
-              className={`flex-1 py-2 text-sm font-semibold tracking-wide uppercase
-                ${tab === t ? 'border-b-2 border-ink text-ink' : 'text-gray-400'}`}
+              className={`flex-1 py-2 text-sm font-semibold tracking-wide uppercase cursor-pointer
+                ${tab === t ? 'border-b-2 border-ink text-ink' : 'text-gray-400 hover:text-gray-700'}`}
             >
               {t === 'login' ? 'Sign in' : 'Register'}
             </button>

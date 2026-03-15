@@ -50,7 +50,7 @@ export async function parseRssFeed(feedUrl: string): Promise<ParsedArticle[]> {
         content:       sanitizeContent(rawContent) || null,
         imageUrl,
         author:        (item as unknown as Record<string, string | undefined>).creator ?? (item as unknown as Record<string, string | undefined>).author ?? null,
-        publishedDate: item.pubDate ? new Date(item.pubDate) : null,
+        publishedDate: item.pubDate ? (() => { const d = new Date(item.pubDate!); return isNaN(d.getTime()) ? null : d; })() : null,
       };
     });
 }

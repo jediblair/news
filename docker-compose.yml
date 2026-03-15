@@ -28,10 +28,8 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      HOSTNAME: "0.0.0.0"
     volumes:
-      - ./web:/app
-      - /app/node_modules
-      - /app/.next
       - ./data/cache:/data/cache
     networks:
       - frontend
@@ -50,8 +48,6 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
-      - ./ingestion:/app
-      - /app/node_modules
       - ./data/cache:/data/cache
       - ./data/logs:/var/log/app
     networks:
@@ -71,8 +67,6 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
-      - ./classifier:/app
-      - /app/node_modules
       - ./data/logs:/var/log/app
     networks:
       - backend
@@ -102,7 +96,7 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "5333:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro

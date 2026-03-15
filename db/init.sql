@@ -38,7 +38,7 @@ CREATE TABLE sources (
   archive_fallback    BOOLEAN      NOT NULL DEFAULT FALSE,
   color               VARCHAR(20)  NOT NULL DEFAULT '#333333',
   font                VARCHAR(100) NOT NULL DEFAULT 'serif',
-  bias_default        VARCHAR(20)  CHECK (bias_default IN ('left','center','right','unknown')),
+  bias_default        VARCHAR(20)  CHECK (bias_default IN ('far-left','left','center-left','center','center-right','right','far-right','unknown')),
   category            VARCHAR(30)  NOT NULL DEFAULT 'general'
                         CHECK (category IN ('general','tech','business','homelab')),
   priority            INT          NOT NULL DEFAULT 5 CHECK (priority BETWEEN 1 AND 10),
