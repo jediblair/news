@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=UnifrakturMaguntia&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --newsprint: #f5f1e8;
+  --ink: #1a1a1a;
+  --column-rule: #c8b89a;
+}
+
+body {
+  background-color: var(--newsprint);
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* Masthead */
+.masthead {
+  border-top: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.masthead-title {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.masthead-meta {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 0.2rem 0;
+  margin-top: 0.25rem;
+}
+
+/* Column rule divider */
+.column-rule {
+  border-right: 1px solid var(--column-rule);
+}
+
+/* Headline style */
+.headline {
+  font-family: 'Playfair Display', Georgia, serif;
+  line-height: 1.15;
+}
+
+/* Source badge */
+.source-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+/* Article card */
+.article-card {
+  border-bottom: 1px solid var(--column-rule);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Doom-scroll break */
+.scroll-break {
+  border-top: 4px double var(--ink);
+  border-bottom: 1px solid var(--ink);
+  text-align: center;
+  padding: 1rem;
+  margin: 2rem 0;
+  font-variant: small-caps;
+  letter-spacing: 0.15em;
+  background: white;
+}
+
+/* Admin panel */
+.admin-table td, .admin-table th {
+  @apply px-3 py-2 text-sm border-b border-gray-200;
+}
+.admin-table th {
+  @apply bg-gray-50 font-semibold text-left;
+}
+
+/* Status dots */
+.status-idle    { @apply inline-block w-2 h-2 rounded-full bg-gray-400; }
+.status-running { @apply inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse; }
+.status-error   { @apply inline-block w-2 h-2 rounded-full bg-red-500; }
