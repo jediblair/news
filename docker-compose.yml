@@ -70,6 +70,7 @@ services:
       - ./data/logs:/var/log/app
     networks:
       - backend
+      - external
     depends_on:
       postgres:
         condition: service_healthy

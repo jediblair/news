@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev":   "ts-node-dev --respawn --transpile-only src/index.ts"
+    "dev":   "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test":  "node --require ts-node/register --test src/__tests__/classifier.test.ts"
   },
   "dependencies": {
     "axios": "^1.7.7",

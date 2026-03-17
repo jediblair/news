@@ -32,7 +32,7 @@ async function fetchArticles(date: Date, page = 1, limit = 30): Promise<Article[
        a.id, a.title, a.summary, a.url, a.image_url,
        a.author,
        COALESCE(a.published_date, a.inferred_date, a.created_at) AS published_date,
-       a.bias_tag, a.is_breaking,
+       a.bias_tag, a.is_breaking, a.trope_score,
        COALESCE(a.content_tags, '{}') AS content_tags,
        s.name AS source_name, s.color AS source_color
      FROM articles a

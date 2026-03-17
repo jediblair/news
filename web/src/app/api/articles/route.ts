@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       `SELECT
          a.id, a.title, a.summary, a.url, a.image_url,
          a.author, a.published_date, a.inferred_date,
-         a.bias_tag, a.is_breaking,
+         a.bias_tag, a.is_breaking, a.trope_score,
          COALESCE(a.content_tags, '{}') AS content_tags,
          s.name AS source_name, s.domain AS source_domain,
          s.color AS source_color, s.font AS source_font,

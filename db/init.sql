@@ -69,6 +69,7 @@ CREATE TABLE articles (
   date_confidence  FLOAT        CHECK (date_confidence BETWEEN 0 AND 1),
   bias_tag         VARCHAR(20)  CHECK (bias_tag IN ('left','center-left','center','center-right','right','unknown')),
   content_tags     TEXT[]       NOT NULL DEFAULT '{}',
+  trope_score      SMALLINT     CHECK (trope_score BETWEEN 0 AND 100),
   classified       BOOLEAN      NOT NULL DEFAULT FALSE,
   is_breaking      BOOLEAN      NOT NULL DEFAULT FALSE,
   initial_date     TIMESTAMP    NOT NULL DEFAULT NOW(),

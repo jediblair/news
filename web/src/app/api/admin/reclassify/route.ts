@@ -15,7 +15,7 @@ export async function POST() {
 
     const { rowCount } = await db.query(
       `UPDATE articles
-       SET classified = FALSE, bias_tag = NULL, content_tags = '{}'
+       SET classified = FALSE, bias_tag = NULL, content_tags = '{}', trope_score = NULL
        WHERE classified = TRUE`,
     );
 
