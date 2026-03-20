@@ -1,7 +1,20 @@
 import * as cheerio from 'cheerio';
 import { safeFetch } from './fetcher';
-import { sanitizeContent, sanitizeUrl, toPlainText } from './sanitize';
+import { cleanArticleHtml, sanitizeContent, sanitizeUrl, toPlainText } from './sanitize';
 import type { ParsedArticle } from './feeds';
+
+// Elements to strip from within the content area before extraction
+const CONTENT_JUNK = [
+  'nav', 'header', 'footer', 'aside', 'script', 'style', 'noscript',
+  '[role="navigation"]', '[role="banner"]', '[role="complementary"]',
+  '[class*="share"]', '[class*="social"]', '[class*="related"]',
+  '[class*="sidebar"]', '[class*="comment"]', '[class*="newsletter"]',
+  '[class*="promo"]', '[class*="advert"]', '[class*="signup"]',
+  '[class*="nav-"]', '[class*="site-header"]', '[class*="site-footer"]',
+  '[class*="breadcrumb"]', '[class*="toolbar"]', '[class*="submenu"]',
+  '[class*="inline-content"]', '[class*="block-content"]',
+  '.ad', '.ads', '.advertisement',
+].join(', ');
 
 /**
  * Scrape a single article page using provided CSS selectors.
@@ -13,6 +26,9 @@ export async function scrapeArticle(
 ): Promise<Partial<ParsedArticle>> {
   const { html } = await safeFetch(url);
   const $        = cheerio.load(html);
+
+  // Strip junk elements from within the content container
+  $(contentSelector).find(CONTENT_JUNK).remove();
 
   const rawContent = $(contentSelector).html() ?? '';
   const content    = sanitizeContent(rawContent);

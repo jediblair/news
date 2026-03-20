@@ -1,6 +1,7 @@
 import { notFound }  from 'next/navigation';
 import { db }         from '@/lib/db';
 import Masthead       from '@/app/components/Masthead';
+import sanitizeHtml   from 'sanitize-html';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,26 +47,43 @@ function formatDate(raw: string | null) {
 }
 
 /**
- * Render stored plain text as readable paragraphs.
- * The classifier strips HTML to plain text, so we just split on blank lines / long runs of whitespace.
+ * Re-sanitize stored content for safe HTML rendering (defense in depth).
+ * Strips any tags/attributes that shouldn't be in article display.
  */
-function renderContent(text: string) {
-  const paragraphs = text
-    .split(/\n{2,}|\r\n{2,}/)
-    .map(p => p.replace(/\s+/g, ' ').trim())
-    .filter(p => p.length > 0);
+const DISPLAY_TAGS = [
+  'p', 'br', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li',
+  'blockquote', 'h2', 'h3', 'h4', 'h5', 'h6', 'figure', 'figcaption',
+];
 
-  // If there are no paragraph breaks, chunk by sentence groups (~4 sentences)
-  if (paragraphs.length === 1 && text.length > 400) {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) ?? [text];
-    const grouped: string[] = [];
-    for (let i = 0; i < sentences.length; i += 4) {
-      grouped.push(sentences.slice(i, i + 4).join(' ').trim());
+function renderSafeHtml(raw: string): string {
+  // Re-sanitise to be safe regardless of what's in the DB
+  let html = sanitizeHtml(raw, {
+    allowedTags: DISPLAY_TAGS,
+    allowedAttributes: { a: ['href', 'title'] },
+    allowedSchemes: ['https', 'http'],
+    disallowedTagsMode: 'discard',
+  });
+
+  // If the content has no block-level tags, wrap plain text in <p> tags
+  if (!/<(p|h[2-6]|ul|ol|blockquote|figure)\b/i.test(html)) {
+    const paragraphs = html
+      .split(/\n{2,}|\r\n{2,}/)
+      .map((p: string) => p.replace(/\s+/g, ' ').trim())
+      .filter((p: string) => p.length > 0);
+
+    if (paragraphs.length === 1 && html.length > 400) {
+      const sentences = html.match(/[^.!?]+[.!?]+/g) ?? [html];
+      const grouped: string[] = [];
+      for (let i = 0; i < sentences.length; i += 4) {
+        grouped.push(sentences.slice(i, i + 4).join(' ').trim());
+      }
+      html = grouped.map((g: string) => `<p>${g}</p>`).join('');
+    } else {
+      html = paragraphs.map((p: string) => `<p>${p}</p>`).join('');
     }
-    return grouped;
   }
 
-  return paragraphs;
+  return html;
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -91,7 +109,7 @@ export default async function ArticlePage({ params }: Props) {
   const article = rows[0];
 
   const body       = article.content ?? article.summary;
-  const paragraphs = body ? renderContent(body) : [];
+  const bodyHtml   = body ? renderSafeHtml(body) : '';
   const dateStr    = formatDate(article.published_date);
   const showBias   = article.bias_tag && article.bias_tag !== 'unknown';
   const biasColor  = showBias ? (BIAS_COLOURS[article.bias_tag!] ?? '#6b7280') : null;
@@ -162,12 +180,11 @@ export default async function ArticlePage({ params }: Props) {
           </p>
 
           {/* Body */}
-          {paragraphs.length > 0 ? (
-            <div style={{ fontSize: '1.05rem', lineHeight: '1.75', fontFamily: 'Georgia, serif' }}>
-              {paragraphs.map((p, i) => (
-                <p key={i} style={{ marginBottom: '1.1rem' }}>{p}</p>
-              ))}
-            </div>
+          {bodyHtml ? (
+            <div
+              style={{ fontSize: '1.05rem', lineHeight: '1.75', fontFamily: 'Georgia, serif' }}
+              dangerouslySetInnerHTML={{ __html: bodyHtml }}
+            />
           ) : (
             <p style={{ color: '#888', fontStyle: 'italic' }}>
               No local copy available.{' '}

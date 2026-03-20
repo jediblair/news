@@ -154,19 +154,19 @@ INSERT INTO app_settings (key, value) VALUES (
 );
 
 -- ─── Seed: Default News Sources ──────────────────────────────
-INSERT INTO sources (name, domain, rss_url, ingestion_method, color, font, bias_default, category, priority, crawl_interval_mins) VALUES
-  ('BBC News',         'bbc.com',            'https://feeds.bbci.co.uk/news/rss.xml',           'rss',    '#c8102e', 'Georgia, serif',          'center',       'general', 8, 60),
-  ('The Guardian',     'theguardian.com',    'https://www.theguardian.com/world/rss',            'rss',    '#052962', 'Guardian Text Egyptian',  'center-left',  'general', 7, 60),
-  ('RNZ',              'rnz.co.nz',          'https://www.rnz.co.nz/rss/news.rss',              'rss',    '#000000', 'Helvetica Neue, sans',    'center',       'general', 8, 30),
-  ('Stuff',            'stuff.co.nz',        'https://www.stuff.co.nz/rss',                     'rss',    '#e8202a', 'Arial, sans-serif',       'center',       'general', 7, 60),
-  ('ABC Australia',    'abc.net.au',         'https://www.abc.net.au/news/feed/51120/rss.xml',   'rss',    '#00539b', 'ABC Sans, sans-serif',    'center',       'general', 7, 60),
-  ('SMH',              'smh.com.au',         'https://www.smh.com.au/rss/feed.xml',              'rss',    '#003057', 'Times New Roman, serif',  'center',       'general', 6, 60),
-  ('Al Jazeera',       'aljazeera.com',      'https://www.aljazeera.com/xml/rss/all.xml',        'rss',    '#c8a427', 'Arial, sans-serif',       'unknown',      'general', 6, 60),
-  ('NBC News',         'nbcnews.com',        'https://feeds.nbcnews.com/nbcnews/public/news',    'rss',    '#F37021', 'Arial, sans-serif',       'center',       'general', 5, 60),
-  ('interest.co.nz',   'interest.co.nz',     'https://www.interest.co.nz/rss',                  'rss',    '#2d6a3f', 'Arial, sans-serif',       'center',       'business',6, 120),
-  ('Ars Technica',     'arstechnica.com',    'https://feeds.arstechnica.com/arstechnica/index', 'rss',    '#ef4624', 'Gentona, sans-serif',     'center',       'tech',    6, 60),
-  ('The Register',     'theregister.com',    'https://www.theregister.com/headlines.atom',       'rss',    '#c00',    'Trebuchet MS, sans-serif','center',       'tech',    6, 60),
-  ('The Verge',        'theverge.com',       'https://www.theverge.com/rss/index.xml',           'rss',    '#fa4b2a', 'Polysans, sans-serif',    'center-left',  'tech',    5, 60),
-  ('Wired',            'wired.com',          'https://www.wired.com/feed/rss',                   'rss',    '#000000', 'Knockout, sans-serif',    'center-left',  'tech',    4, 120),
-  ('ServeTheHome',     'servethehome.com',   'https://www.servethehome.com/feed/',               'rss',    '#0a6640', 'Arial, sans-serif',       'center',       'homelab', 3, 240),
-  ('StorageReview',    'storagereview.com',  'https://www.storagereview.com/feed',               'rss',    '#004b8d', 'Arial, sans-serif',       'center',       'homelab', 3, 240);
+INSERT INTO sources (name, domain, rss_url, scrape_selector, date_selector, ingestion_method, color, font, bias_default, category, priority, crawl_interval_mins) VALUES
+  ('BBC News',         'bbc.com',            'https://feeds.bbci.co.uk/news/rss.xml',           'article',                  'time[datetime]',        'rss',    '#c8102e', 'Georgia, serif',          'center',       'general', 8, 60),
+  ('The Guardian',     'theguardian.com',    'https://www.theguardian.com/world/rss',            '[id="maincontent"]',       'time[datetime]',        'rss',    '#052962', 'Guardian Text Egyptian',  'center-left',  'general', 7, 60),
+  ('RNZ',              'rnz.co.nz',          'https://www.rnz.co.nz/rss/news.rss',              '.article__body',           'time[datetime]',        'rss',    '#000000', 'Helvetica Neue, sans',    'center',       'general', 8, 30),
+  ('Stuff',            'stuff.co.nz',        'https://www.stuff.co.nz/rss',                     '.sics-component__story',   'time[datetime]',        'rss',    '#e8202a', 'Arial, sans-serif',       'center',       'general', 7, 60),
+  ('ABC Australia',    'abc.net.au',         'https://www.abc.net.au/news/feed/51120/rss.xml',   '[data-component="BodyContent"]', 'time[datetime]',  'rss',    '#00539b', 'ABC Sans, sans-serif',    'center',       'general', 7, 60),
+  ('SMH',              'smh.com.au',         'https://www.smh.com.au/rss/feed.xml',              'article',                  'time[datetime]',        'rss',    '#003057', 'Times New Roman, serif',  'center',       'general', 6, 60),
+  ('Al Jazeera',       'aljazeera.com',      'https://www.aljazeera.com/xml/rss/all.xml',        '.wysiwyg',                 'time[datetime]',        'rss',    '#c8a427', 'Arial, sans-serif',       'unknown',      'general', 6, 60),
+  ('NBC News',         'nbcnews.com',        'https://feeds.nbcnews.com/nbcnews/public/news',    '.article-body__content',   'time[datetime]',        'rss',    '#F37021', 'Arial, sans-serif',       'center',       'general', 5, 60),
+  ('interest.co.nz',   'interest.co.nz',     'https://www.interest.co.nz/rss',                  NULL,                       NULL,                    'rss',    '#2d6a3f', 'Arial, sans-serif',       'center',       'business',6, 120),
+  ('Ars Technica',     'arstechnica.com',    'https://feeds.arstechnica.com/arstechnica/index', '.article-content',         'time[datetime]',        'rss',    '#ef4624', 'Gentona, sans-serif',     'center',       'tech',    6, 60),
+  ('The Register',     'theregister.com',    'https://www.theregister.com/headlines.atom',       '#article-body',            'time[datetime]',        'rss',    '#c00',    'Trebuchet MS, sans-serif','center',       'tech',    6, 60),
+  ('The Verge',        'theverge.com',       'https://www.theverge.com/rss/index.xml',           '.article-body',            'time[datetime]',        'rss',    '#fa4b2a', 'Polysans, sans-serif',    'center-left',  'tech',    5, 60),
+  ('Wired',            'wired.com',          'https://www.wired.com/feed/rss',                   '.article__body',           'time[datetime]',        'rss',    '#000000', 'Knockout, sans-serif',    'center-left',  'tech',    4, 120),
+  ('ServeTheHome',     'servethehome.com',   'https://www.servethehome.com/feed/',               '.entry-content',           'time[datetime]',        'rss',    '#0a6640', 'Arial, sans-serif',       'center',       'homelab', 3, 240),
+  ('StorageReview',    'storagereview.com',  'https://www.storagereview.com/feed',               '.entry-content',           'time[datetime]',        'rss',    '#004b8d', 'Arial, sans-serif',       'center',       'homelab', 3, 240);

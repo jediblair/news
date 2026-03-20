@@ -97,13 +97,13 @@ export async function crawlSource(source: Source, jobId: string): Promise<{
         continue;
       }
 
-      // If content is thin, try scraping the full article page
+      // Scrape the full article page if content is thin or image is missing
       let content = art.content;
-      if (!content || content.length < 200) {
-        if (source.scrape_selector) {
+      const needsScrape = !content || content.length < 200 || !art.imageUrl;
+      if (needsScrape && source.scrape_selector) {
           try {
             const scraped = await scrapeArticle(safeUrl, source.scrape_selector, source.date_selector ?? undefined);
-            content = scraped.content ?? content;
+            if (!content || content.length < 200) content = scraped.content ?? content;
             if (!art.publishedDate) art.publishedDate = scraped.publishedDate ?? null;
             if (!art.imageUrl) art.imageUrl = scraped.imageUrl ?? null;
           } catch (err) {
@@ -120,7 +120,6 @@ export async function crawlSource(source: Source, jobId: string): Promise<{
               } catch { /* skip */ }
             }
           }
-        }
       }
 
       // Insert article
